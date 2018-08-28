@@ -38,6 +38,7 @@ else:
 def make_env():
     return ptan.common.wrappers.wrap_dqn(gym.make(ENV_NAME))
 
+
 TotalReward = collections.namedtuple('TotalReward', field_names='reward')
 
 
@@ -57,11 +58,11 @@ if __name__ == "__main__":
     mp.set_start_method('spawn')
     parser = argparse.ArgumentParser()
     parser.add_argument("--cuda", default=False, action="store_true", help="Enable cuda")
-    parser.add_argument("-n", "--name", required=True, help="Name of the run")
+    parser.add_argument("-n", "--name", required=False, help="Name of the run")
     args = parser.parse_args()
     device = "cuda" if args.cuda else "cpu"
 
-    writer = SummaryWriter(comment="-a3c-data_" + NAME + "_" + args.name)
+    writer = SummaryWriter(comment="-a3c-data_" + NAME + "_" + "test")
 
     env = make_env()
     net = common.AtariA2C(env.observation_space.shape, env.action_space.n).to(device)
