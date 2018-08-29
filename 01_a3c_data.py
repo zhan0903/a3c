@@ -22,8 +22,8 @@ BATCH_SIZE = 128
 REWARD_STEPS = 4
 CLIP_GRAD = 0.1
 
-PROCESSES_COUNT = 4#2#4
-NUM_ENVS = 15#5#15
+PROCESSES_COUNT = 2#4#2#4
+NUM_ENVS = 5#5#15
 
 if True:
     ENV_NAME = "PongNoFrameskip-v4"
@@ -44,7 +44,9 @@ TotalReward = collections.namedtuple('TotalReward', field_names='reward')
 
 def data_func(net, device, train_queue):
     envs = [make_env() for _ in range(NUM_ENVS)]
-    agent = ptan.agent.PolicyAgent(lambda x: net(x)[0], device=device, apply_softmax=True)
+    new_net = common.AtariA2C(envs[0].observation_space.shape, envs[0].action_space.n)
+    new_net.load_state_dict(net)
+    agent = ptan.agent.PolicyAgent(lambda x: new_net(x)[0], device=device, apply_softmax=True)
     exp_source = ptan.experience.ExperienceSourceFirstLast(envs, agent, gamma=GAMMA, steps_count=REWARD_STEPS)
 
     for exp in exp_source:
@@ -73,7 +75,7 @@ if __name__ == "__main__":
     train_queue = mp.Queue(maxsize=PROCESSES_COUNT)
     data_proc_list = []
     for _ in range(PROCESSES_COUNT):
-        data_proc = mp.Process(target=data_func, args=(net, device, train_queue))
+        data_proc = mp.Process(target=data_func, args=(net.state_dict(), device, train_queue))
         data_proc.start()
         data_proc_list.append(data_proc)
 
