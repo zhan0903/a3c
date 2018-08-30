@@ -44,7 +44,7 @@ TotalReward = collections.namedtuple('TotalReward', field_names='reward')
 
 def data_func(net, device, train_queue):
     envs = [make_env() for _ in range(NUM_ENVS)]
-    new_net = common.AtariA2C(envs[0].observation_space.shape, envs[0].action_space.n)
+    new_net = common.AtariA2C(envs[0].observation_space.shape, envs[0].action_space.n).to(device)
     new_net.load_state_dict(net)
     agent = ptan.agent.PolicyAgent(lambda x: new_net(x)[0], device=device, apply_softmax=True)
     exp_source = ptan.experience.ExperienceSourceFirstLast(envs, agent, gamma=GAMMA, steps_count=REWARD_STEPS)
